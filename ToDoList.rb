@@ -4,7 +4,6 @@ class ToDoItem
   #initialize the item status to not done and the due date to N/A
   def initialize
     @status = false
-    @dueDate = "N/A"
   end
 
   #method to set the title
@@ -30,9 +29,9 @@ class ToDoItem
   #method to print the item
   def printItem
     if @status
-      "Title: " + @title + ", Description: " + @description + ", Status: Done, Due Date: " + @dueDate
+      "Title: " + @title + ", Description: " + @description + ", Status: Done"
     else
-      "Title: " + @title + ", Description: " + @description + ", Status: Not Done, Due Date: " + @dueDate
+      "Title: " + @title + ", Description: " + @description + ", Status: Not Done"
     end
   end
 
@@ -45,16 +44,6 @@ class ToDoItem
   def status
     @status
   end
-
-  #method to add a due date to the item
-  def setDueDate(date)
-    @dueDate = date
-  end
-
-  #method to return the due date of an items
-  def dueDate
-    Date.parse(@dueDate)
-  end
 end
 
 #-----------------------------------------------
@@ -64,10 +53,21 @@ class ToDoList
   #initialize a blank array to store our to do items
   def initialize
     @toDoListArray = []
+    @toDoDueListArray = []
   end
-  #method to add a toDoItem
+
+  #method to add a ToDoItem
   def addItem(item)
     @toDoListArray.push(item)
+  end
+
+  #method to add a DueItem
+  def addDueItem(dueItem)
+    @toDoDueListArray.push(dueItem)
+  end
+  #method to add an anniversary
+  def addAnniversaryItem(anniversaryItem)
+    @toDoDueListArray.push(anniversaryItem)
   end
 
   #method to print items that are marked as done
@@ -78,29 +78,82 @@ class ToDoList
         doneList = doneList + e.printItem + " "
       end
     end
-    doneList
+    doneList.rstrip
   end
 
   #method to print items that are not marked as done
   def printNotDone
-    notDoneList = ""
+    notDoneList = self.printNotDone + " "
     @toDoListArray.each do |e|
       if !e.status
         notDoneList = notDoneList + e.printItem + " "
       end
     end
-    notDoneList
+    notDoneList.strip
   end
 
   #method to print the items not done which are due today
   def dueToday
     dueTodayList = ""
-    @toDoListArray.each do |e|
-      if !e.status && e.dueDate == Date.today
-        dueTodayList = dueTodayList + e.printItem + " "
+    @toDoDueListArray.each do |e|
+      if !e.status && e.date == Date.today
+        dueTodayList = dueTodayList + e.print + " "
       end
     end
-    dueTodayList
+    dueTodayList.rstrip
   end
 
+  #method to print the items that are still due in order of due date
+  def printNotDone
+    @toDoDueListArray = @toDoDueListArray.sort_by do |d|
+      d.date
+    end
+    sortDueList = ""
+    @toDoDueListArray.each do |e|
+      if !e.status
+        sortDueList = sortDueList + e.print + " "
+      end
+    end
+    sortDueList.rstrip
+  end
+
+end
+
+#-----------------------------------------------
+#create a class DueItem which inherits from the class ToDoItem
+class DueItem < ToDoItem
+  #method to add a due date to the item
+  def setDueDate(date)
+    @dueDate = date.to_s
+  end
+
+  #method to return the due date of an items
+  def date
+    Date.strptime(@dueDate, "%m-%d-%Y")
+  end
+
+  #method to print items with a due date
+  def print
+    self.printItem + ", Due Date: " + @dueDate
+  end
+
+end
+
+#-----------------------------------------------
+#create a class Anniversary which inherits from the class ToDoItem
+class Anniversary < ToDoItem
+  #method to set an Anniversary date
+  def setAnniversaryDate(date)
+    @anniversary = date.to_s
+  end
+
+  #method to return Anniversary date
+  def date
+    Date.strptime(@anniversary + "-" + Date.today.year.to_s, "%m-%d-%Y")
+  end
+
+  #method to print anniversary
+  def print
+    self.printItem + ", Anniversary Date: " + @anniversary
+  end
 end
